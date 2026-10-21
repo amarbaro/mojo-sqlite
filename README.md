@@ -1,5 +1,7 @@
 # mojo-sqlite
 
+[![CI](https://github.com/amarbaro/mojo-sqlite/actions/workflows/ci.yml/badge.svg)](https://github.com/amarbaro/mojo-sqlite/actions/workflows/ci.yml)
+
 SQLite for Mojo that returns the same rows as Python's `sqlite3`, byte for byte, and
 runs 2.7× faster on inserts and 4× to 5.5× faster on scans.
 
@@ -59,9 +61,11 @@ The RSS difference is the Mojo runtime: an empty Mojo program uses 11.6 MB.
 ## Check
 
 ```
-uv sync
-scripts/check.sh
+scripts/ci.sh
 ```
+
+It runs `uv sync`, then `scripts/check.sh`. CI runs the same script on every push, on
+Ubuntu 24.04 (sqlite 3.45); it also passes on sqlite 3.54.
 
 Every SQL file in `tests/cases/` runs through this library and through Python
 `sqlite3` with the same system libsqlite3, and the outputs must be identical: integers,
