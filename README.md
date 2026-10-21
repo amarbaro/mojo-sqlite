@@ -29,9 +29,10 @@ The library is loaded at run time, so no linker flags are needed.
 
 - `Database`: open, `exec` for scripts, `prepare`, `begin`/`commit`/`rollback`,
   `changes`, `last_insert_rowid`. Busy timeout 5 s by default.
-- `Statement`: `bind` for `Int`, `Int64`, `Float64`, `String`, plus `bind_null`;
-  `step`, `run`, `reset`; typed column reads, `is_null`, `type`, `name`.
-- `text_view(col)`: a column's text read in place from sqlite's buffer, no copy.
+- `Statement`: `bind` for `Int`, `Int64`, `Float64`, `String`, BLOBs (`List[UInt8]`)
+  and `bind_null`, by position or by name (`:prio`, `@prio`, `$prio`); `step`, `run`,
+  `reset`; typed column reads, `is_null`, `type`, `name`.
+- `text_view(col)` and `blob_view(col)`: read in place from sqlite's buffer, no copy.
 - Errors carry sqlite's own message: `sqlite: UNIQUE constraint failed: u.k (rc 19)`.
 
 The API is in [docs/api.md](docs/api.md). The memory and speed design is in
@@ -52,7 +53,6 @@ The RSS difference is the Mojo runtime: an empty Mojo program uses 11.6 MB.
 
 ## Limits
 
-- No BLOB binding or reading yet, and no named parameters (`:name`).
 - One connection per `Database`. Do not share a `Database` or `Statement` across threads.
 - Linux only: the library is loaded as `libsqlite3.so.0`.
 
@@ -65,8 +65,9 @@ scripts/check.sh
 
 Every SQL file in `tests/cases/` runs through this library and through Python
 `sqlite3` with the same system libsqlite3, and the outputs must be identical: integers,
-the exact bits of every float, text with tabs and newlines, NULL, and which statements
-fail. Then `tests/api.mojo` covers lifetimes, bind slots, errors and statement reuse.
+the exact bits of every float, text with tabs and newlines, NULL, BLOBs as hex, and
+which statements fail. Then `tests/api.mojo` covers lifetimes, bind slots, errors and
+statement reuse.
 
 ## For coding agents
 

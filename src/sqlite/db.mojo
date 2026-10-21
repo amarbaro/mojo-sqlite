@@ -32,6 +32,8 @@ struct _Lib(Movable):
     var column_double: Int
     var column_text: Int
     var column_bytes: Int
+    var bind_blob: Int
+    var column_blob: Int
 
     def __init__(out self) raises:
         self.dl = OwnedDLHandle("libsqlite3.so.0")
@@ -46,6 +48,8 @@ struct _Lib(Movable):
         self.column_double = _addr(self.dl, "sqlite3_column_double")
         self.column_text = _addr(self.dl, "sqlite3_column_text")
         self.column_bytes = _addr(self.dl, "sqlite3_column_bytes")
+        self.bind_blob = _addr(self.dl, "sqlite3_bind_blob")
+        self.column_blob = _addr(self.dl, "sqlite3_column_blob")
 
     def call[name: StaticString, R: RegisterPassable = NoneType, *T: AnyType](self, *args: *T) -> R:
         """Cold path: resolve by name on every call."""
@@ -158,6 +162,7 @@ struct Statement(Movable):
     var db: Int
     var stmt: Int
     var texts: List[String]
+    var blobs: List[List[UInt8]]
 
     def __init__(out self, lib: ArcPointer[_Lib], db: Int, stmt: Int):
         self.lib = lib
@@ -165,6 +170,7 @@ struct Statement(Movable):
         self.stmt = stmt
         var n = Int(lib[].call["sqlite3_bind_parameter_count", c_int](stmt))
         self.texts = List[String](length=n, fill=String())
+        self.blobs = List[List[UInt8]](length=n, fill=List[UInt8]())
 
     def __deinit__(deinit self):
         _ = self.lib[].call["sqlite3_finalize", c_int](self.stmt)
@@ -194,6 +200,47 @@ struct Statement(Movable):
                 self.stmt, c_int(i), Int(s.unsafe_ptr()), c_int(s.byte_length()), STATIC
             )
         )
+
+    def bind(mut self, i: Int, var v: List[UInt8]) raises:
+        """BLOB. The bytes move into a slot this statement owns, no copy."""
+        if i < 1 or i > len(self.blobs):
+            raise Error("sqlite: bind index " + String(i) + " out of range")
+        if len(v) == 0:
+            # a null pointer with length 0 would bind NULL, not an empty BLOB
+            self._check(self.lib[].call["sqlite3_bind_zeroblob", c_int](self.stmt, c_int(i), c_int(0)))
+            return
+        self.blobs[i - 1] = v^
+        ref b = self.blobs[i - 1]
+        self._check(
+            _fn[_I_ICPCP](self.lib[].bind_blob)(self.stmt, c_int(i), Int(b.unsafe_ptr()), c_int(len(b)), STATIC)
+        )
+
+    def index(self, name: String) raises -> Int:
+        """Position of a named parameter such as ":prio". Look it up once
+        outside a loop and bind by position inside it."""
+        var n = name
+        var i = Int(self.lib[].call["sqlite3_bind_parameter_index", c_int](self.stmt, n.as_c_string_span().ptr()))
+        if i == 0:
+            raise Error("sqlite: no parameter named '" + name + "'")
+        return i
+
+    def bind(mut self, name: String, v: Int) raises:
+        self.bind(self.index(name), v)
+
+    def bind(mut self, name: String, v: Int64) raises:
+        self.bind(self.index(name), v)
+
+    def bind(mut self, name: String, v: Float64) raises:
+        self.bind(self.index(name), v)
+
+    def bind(mut self, name: String, var v: String) raises:
+        self.bind(self.index(name), v^)
+
+    def bind(mut self, name: String, var v: List[UInt8]) raises:
+        self.bind(self.index(name), v^)
+
+    def bind_null(mut self, name: String) raises:
+        self.bind_null(self.index(name))
 
     def bind_null(mut self, i: Int) raises:
         self._check(_fn[_I_IC](self.lib[].bind_null)(self.stmt, c_int(i)))
@@ -253,3 +300,13 @@ struct Statement(Movable):
 
     def text(self, col: Int) -> String:
         return String(self.text_view(col))
+
+    def blob_view(self, col: Int) -> Span[UInt8, ImmUntrackedOrigin]:
+        """The column's bytes in sqlite's own buffer, no copy. Valid only
+        until the next step(), reset() or the statement's end."""
+        var p = _fn[_P_IC](self.lib[].column_blob)(self.stmt, c_int(col))
+        var n = _fn[_I_IC](self.lib[].column_bytes)(self.stmt, c_int(col))
+        return Span(unsafe_ptr=Pointer[UInt8, ImmUntrackedOrigin](unsafe_from_address=p), length=Int(n))
+
+    def blob(self, col: Int) -> List[UInt8]:
+        return List[UInt8](self.blob_view(col))

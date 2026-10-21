@@ -32,3 +32,11 @@ SELECT count(*) FROM t
 WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM n WHERE x < 5) SELECT x, x * x FROM n
 ;;
 SELECT json_extract('{"a": [1, 2, {"b": "c"}]}', '$.a[2].b'), hex(x'00ff'), zeroblob(0) IS NOT NULL
+;;
+SELECT x'', x'00', x'00ff10', typeof(x''), length(x'00ff'), zeroblob(3), CAST('hi' AS BLOB)
+;;
+CREATE TABLE bl(b BLOB)
+;;
+INSERT INTO bl VALUES (x'deadbeef00'), (x''), (NULL)
+;;
+SELECT b, typeof(b), length(b) FROM bl

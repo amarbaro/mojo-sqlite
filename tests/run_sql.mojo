@@ -2,7 +2,7 @@
 # Same format as tools/oracle.py (Python sqlite3); scripts/check.sh diffs the two.
 from std.memory import bitcast
 from std.sys import argv
-from sqlite import Database, Statement, INTEGER, FLOAT, NULL
+from sqlite import Database, Statement, INTEGER, FLOAT, BLOB, NULL
 
 
 def cell(q: Statement, c: Int) -> String:
@@ -13,6 +13,13 @@ def cell(q: Statement, c: Int) -> String:
         return "f:" + String(bitcast[DType.int64](q.float(c)))
     if t == NULL:
         return "n"
+    if t == BLOB:
+        comptime HEX = "0123456789abcdef"
+        var out = String("b:")
+        for b in q.blob_view(c):
+            out += HEX[byte=Int(b >> 4)]
+            out += HEX[byte=Int(b & 15)]
+        return out
     return "t:" + q.text(c).replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
 
 

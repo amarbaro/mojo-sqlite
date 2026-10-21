@@ -29,9 +29,19 @@ The connection closes when the `Database` is destroyed. It is safe to destroy it
 |---|---|
 | `bind(i, Int)`, `bind(i, Int64)`, `bind(i, Float64)` | number |
 | `bind(i, String)` | text; the string moves into the statement, sqlite does not copy it |
+| `bind(i, List[UInt8])` | BLOB; the bytes move in the same way. An empty list binds an empty BLOB, not NULL |
 | `bind_null(i)` | NULL |
 
 A binding stays until it is bound again, including across `reset()`.
+
+### Named parameters
+
+`:name`, `@name` and `$name` in the SQL can be bound by name with every `bind`
+overload above and `bind_null(name)`: `q.bind(":prio", 90)`. A name used twice in the
+SQL is one parameter. An unknown name raises `no parameter named ':x'`.
+
+`index(name)` returns the position. Each named bind looks the name up, so in a loop
+call `index` once and bind by position.
 
 ### Run
 
@@ -52,6 +62,8 @@ A binding stays until it is bound again, including across `reset()`.
 | `float(c)` | `Float64` |
 | `text(c)` | `String`, a copy |
 | `text_view(c)` | `StringSlice` into sqlite's buffer, valid only until the next `step()` or `reset()` |
+| `blob(c)` | `List[UInt8]`, a copy |
+| `blob_view(c)` | `Span[UInt8]` into sqlite's buffer, same lifetime as `text_view` |
 | `is_null(c)` | `Bool` |
 | `type(c)` | `INTEGER`, `FLOAT`, `TEXT`, `BLOB` or `NULL` |
 | `name(c)` | column name |

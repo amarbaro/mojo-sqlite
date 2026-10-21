@@ -53,9 +53,16 @@ def main() raises:
 `Error("sqlite: <sqlite's message> (rc N)")`. Show it as it is; it names the table,
 column or constraint.
 
+## BLOBs and named parameters
+
+- BLOB: `bind(i, bytes^)` with a `List[UInt8]`, read with `blob(c)` (copy) or
+  `blob_view(c)` (no copy, same lifetime rule as `text_view`).
+- Named: `q.bind(":prio", 90)`. Each named bind looks the name up: in a hot loop take
+  `var i = q.index(":prio")` once and bind by position.
+
 ## Not supported
 
-BLOB values, named parameters (`:name`), sharing one `Database` across threads.
+Sharing one `Database` across threads.
 
 ## Check a change to the library
 

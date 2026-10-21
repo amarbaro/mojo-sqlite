@@ -4,6 +4,7 @@ import sqlite3, struct, sys
 def cell(v):
     if v is None: return "n"
     if isinstance(v, int): return f"i:{v}"
+    if isinstance(v, bytes): return "b:" + v.hex()
     if isinstance(v, float): return "f:%d" % struct.unpack("<q", struct.pack("<d", v))[0]
     return "t:" + v.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
 
