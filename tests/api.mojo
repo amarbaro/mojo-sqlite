@@ -145,4 +145,15 @@ def main() raises:
     assert_equal(nr.text(2), "named")
     assert_equal(nr.int(3), 2)
     assert_equal(nr.int(4), 1)
+    # read_only: reads work, writes raise, a missing file raises instead of being created
+    var rw = Database(".work/ro.db")
+    rw.exec("CREATE TABLE IF NOT EXISTS r(x); DELETE FROM r; INSERT INTO r VALUES (5)")
+    var ro = Database(".work/ro.db", read_only=True)
+    var rq = ro.prepare("SELECT x FROM r")
+    assert_true(rq.step())
+    assert_equal(rq.int(0), 5)
+    with assert_raises(contains="readonly"):
+        ro.exec("INSERT INTO r VALUES (6)")
+    with assert_raises(contains="cannot open"):
+        _ = Database(".work/does-not-exist.db", read_only=True)
     print("api: ok")

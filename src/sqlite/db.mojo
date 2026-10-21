@@ -101,12 +101,12 @@ struct Database(Movable):
     var lib: ArcPointer[_Lib]
     var db: Int
 
-    def __init__(out self, path: String, busy_timeout_ms: Int = 5000) raises:
+    def __init__(out self, path: String, busy_timeout_ms: Int = 5000, read_only: Bool = False) raises:
         self.lib = ArcPointer(_Lib())
         self.db = 0
         var p = path
         var rc = self.lib[].call["sqlite3_open_v2", c_int](
-            p.as_c_string_span().ptr(), Pointer(to=self.db), OPEN_READWRITE_CREATE, Int(0)
+            p.as_c_string_span().ptr(), Pointer(to=self.db), c_int(1) if read_only else OPEN_READWRITE_CREATE, Int(0)
         )
         if rc != OK:
             raise Error("sqlite: cannot open '" + path + "' (rc " + String(rc) + ")")

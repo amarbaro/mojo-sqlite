@@ -11,7 +11,7 @@ failure.
 
 | Method | Does |
 |---|---|
-| `Database(path, busy_timeout_ms=5000)` | open or create; `":memory:"` for an in-memory database |
+| `Database(path, busy_timeout_ms=5000, read_only=False)` | open or create; `":memory:"` for an in-memory database; `read_only=True` opens an existing file with SQLITE_OPEN_READONLY (a write raises, nothing is created) |
 | `exec(sql)` | run one or more `;`-separated statements that take no parameters |
 | `prepare(sql) -> Statement` | compile one statement |
 | `begin()`, `commit()`, `rollback()` | transactions |
