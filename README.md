@@ -18,7 +18,7 @@ def main() raises:
 
 ## Install
 
-Requires Mojo 1.1 and the system `libsqlite3.so.0` (any Linux distribution has it).
+Requires Mojo 1.2 and the system `libsqlite3.so.0` (any Linux distribution has it).
 The library is loaded at run time, so no linker flags are needed.
 
 | Way | Command |

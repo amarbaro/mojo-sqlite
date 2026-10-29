@@ -5,7 +5,7 @@ description: "Use SQLite from Mojo with the mojo-sqlite library: open, prepare, 
 
 # mojo-sqlite
 
-SQLite for Mojo 1.1 on Linux. It loads the system `libsqlite3.so.0` at run time: no
+SQLite for Mojo 1.2 on Linux. It loads the system `libsqlite3.so.0` at run time: no
 linker flags. Its results are checked byte for byte against Python's `sqlite3`.
 
 ## Install
