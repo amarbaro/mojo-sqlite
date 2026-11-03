@@ -1,6 +1,9 @@
 # mojo-sqlite
 
-[![CI](https://github.com/amarbaro/mojo-sqlite/actions/workflows/ci.yml/badge.svg)](https://github.com/amarbaro/mojo-sqlite/actions/workflows/ci.yml)
+<!-- badges -->
+[![ci](https://github.com/amarbaro/mojo-sqlite/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/amarbaro/mojo-sqlite/actions/workflows/ci.yml) [![latest release](https://img.shields.io/github/v/release/amarbaro/mojo-sqlite)](https://github.com/amarbaro/mojo-sqlite/releases/latest) [![license](https://img.shields.io/github/license/amarbaro/mojo-sqlite)](https://github.com/amarbaro/mojo-sqlite/blob/main/LICENSE)
+<!-- /badges -->
+
 
 SQLite for Mojo that returns the same rows as Python's `sqlite3`, byte for byte, and
 runs 2.7× faster on inserts and 4× to 5.5× faster on scans.
