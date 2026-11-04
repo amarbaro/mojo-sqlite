@@ -12,55 +12,20 @@ from sqlite import Database
 
 
 def main() raises:
-    var db = Database("jobs.db")
-    db.exec("CREATE TABLE IF NOT EXISTS jobs(id INTEGER PRIMARY KEY, cmd TEXT, prio INTEGER)")
-
-    # prepare once, bind and run many times
-    db.begin()
-    var ins = db.prepare("INSERT INTO jobs(cmd, prio) VALUES (?, ?)")
-    for i in range(3):
-        ins.bind(1, "train --seed " + String(i))
-        ins.bind(2, i * 10)
-        ins.run()
-        ins.reset()
-    db.commit()
-
-    var q = db.prepare("SELECT id, cmd, prio FROM jobs WHERE prio >= ? ORDER BY prio DESC")
-    q.bind(1, 10)
+    var db = Database(":memory:")
+    db.exec("CREATE TABLE jobs(cmd TEXT, prio INTEGER); INSERT INTO jobs VALUES ('train', 10), ('eval', 20)")
+    var q = db.prepare("SELECT cmd, prio FROM jobs WHERE prio >= ?")  # prepare once, bind and run many times
+    q.bind(1, 15)
     while q.step():
-        print(q.int(0), q.text(1), q.int(2))
+        print(q.text(0), q.int(1))
 ```
-
-| | insert | scan | peak RSS |
-|---|---|---|---|
-| mojo-sqlite, `text()` | 80 to 82 ms | 25 to 29 ms | 15.4 MB |
 <!-- /install -->
-
 
 SQLite for Mojo that returns the same rows as Python's `sqlite3`, byte for byte, and
 runs 2.7× faster on inserts and 4× to 5.5× faster on scans.
 
-```mojo
-from sqlite import Database
-
-def main() raises:
-    var db = Database("jobs.db")
-    var q = db.prepare("SELECT id, cmd FROM jobs WHERE prio >= ?")
-    q.bind(1, 10)
-    while q.step():
-        print(q.int(0), q.text(1))
-```
-
-## Install
-
 Requires Mojo 1.2 and the system `libsqlite3.so.0` (any Linux distribution has it).
 The library is loaded at run time, so no linker flags are needed.
-
-| Way | Command |
-|---|---|
-| Source path | `mojo run -I path/to/mojo-sqlite/src app.mojo` |
-| Precompiled | `mojo precompile src/sqlite -o sqlite.mojoc`, then put it next to your code |
-| Vendor | copy `src/sqlite/` into your project |
 
 ## What you get
 
