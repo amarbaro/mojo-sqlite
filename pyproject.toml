@@ -1,6 +1,6 @@
 [project]
 name = "mojo-sqlite"
-version = "0.1.4"
+version = "0.1.5"
 description = "SQLite bindings for Mojo, measured against Python sqlite3"
 license = "Apache-2.0"
 requires-python = ">=3.11,<3.15"
