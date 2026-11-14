@@ -1,0 +1,4 @@
+name = "mojo-sqlite"
+version = "0.1.5"
+description = "SQLite bindings for Mojo, measured against Python sqlite3"
+tags = ["mojo", "database", "sqlite"]
