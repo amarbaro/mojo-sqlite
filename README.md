@@ -1,5 +1,7 @@
 # mojo-sqlite
 
+> **Moved:** this library now lives in [amarbaro/mojo-libs](https://github.com/amarbaro/mojo-libs/tree/main/libs/sqlite). This repository is read-only; issues and pull requests go there.
+
 <!-- badges -->
 [![ci](https://github.com/amarbaro/mojo-sqlite/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/amarbaro/mojo-sqlite/actions/workflows/ci.yml) [![latest release](https://img.shields.io/github/v/release/amarbaro/mojo-sqlite)](https://github.com/amarbaro/mojo-sqlite/releases/latest) [![license](https://img.shields.io/github/license/amarbaro/mojo-sqlite)](https://github.com/amarbaro/mojo-sqlite/blob/main/LICENSE)
 <!-- /badges -->
